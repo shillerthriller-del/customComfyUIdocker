@@ -35,6 +35,8 @@ RUN pip install uv gitpython
 
 WORKDIR /app/ComfyUI/custom_nodes
 RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git comfyui-manager
+RUN pip install -r comfyui-manager/requirements.txt
+
 RUN git clone https://github.com/city96/ComfyUI-GGUF.git ComfyUI-GGUF
 RUN git clone https://github.com/cubiq/ComfyUI_IPAdapter_plus.git ComfyUI_IPAdapter_plus
 RUN git clone https://github.com/Acly/comfyui-inpaint-nodes.git comfyui-inpaint-nodes
