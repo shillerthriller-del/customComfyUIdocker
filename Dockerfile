@@ -53,6 +53,9 @@ RUN pip install -r requirements.txt || true
 WORKDIR /app/ComfyUI/custom_nodes/ComfyUI-GGUF
 RUN pip install -r requirements.txt || true
 
+WORKDIR /app/ComfyUI/custom_nodes/comfyui-tooling-nodes
+RUN pip install -r requirements.txt || true
+
 WORKDIR /app/ComfyUI
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
