@@ -57,9 +57,4 @@ echo "=========================================="
 echo ""
 
 # Start ComfyUI
-cd /app/ComfyUI
-exec python main.py \
-    --listen 0.0.0.0 \
-    --port 8188 \
-    --enable-cors-header \
-    --preview-method auto
+exec python -u main.py --listen 0.0.0.0 --port 8188 --enable-cors-header --preview-method auto 2>&1
