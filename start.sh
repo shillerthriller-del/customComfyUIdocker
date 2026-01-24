@@ -45,6 +45,9 @@ echo "GPU Information:"
 nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader
 echo "=========================================="
 
+pip install jupyterlab -q
+jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' &
+
 # Print connection info
 echo ""
 echo "=========================================="
