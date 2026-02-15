@@ -32,6 +32,7 @@ RUN pip install -r requirements.txt
 RUN pip install "numpy>=2.0.0,<2.3.0"
 RUN pip install matplotlib opencv-python-headless onnxruntime-gpu insightface scikit-image scipy
 RUN pip install uv gitpython
+RUN pip install jupyterlab
 
 WORKDIR /app/ComfyUI/custom_nodes
 RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git comfyui-manager
