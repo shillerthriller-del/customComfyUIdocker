@@ -15,6 +15,8 @@ jobs:
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           sudo docker image prune --all --force
           df -h
 
@@ -30,9 +32,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Generate tags
+        id: meta
+        run: |
+          echo "date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+          echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/comfyui-flux:v1
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/comfyui-krita:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/comfyui-krita:v2.1
+            ${{ secrets.DOCKERHUB_USERNAME }}/comfyui-krita:${{ steps.meta.outputs.date }}-${{ steps.meta.outputs.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
