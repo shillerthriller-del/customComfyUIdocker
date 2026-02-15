@@ -86,6 +86,7 @@ RUN pip install --no-cache-dir \
     pyyaml \
     gitpython \
     matplotlib \
+    uv \
     # JupyterLab for debugging
     jupyterlab
 
