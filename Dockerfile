@@ -27,9 +27,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Layer 1: System dependencies (rarely changes)
 # ==============================================================================
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.12 \
-    python3.12-venv \
-    python3.12-dev \
+    software-properties-common \
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    python3.11 \
+    python3.11-venv \
+    python3.11-dev \
     python3-pip \
     git \
     wget \
@@ -45,12 +48,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     htop \
     nano \
     && rm -rf /var/lib/apt/lists/* \
-    && ln -sf /usr/bin/python3.12 /usr/bin/python \
-    && ln -sf /usr/bin/python3.12 /usr/bin/python3
+    && ln -sf /usr/bin/python3.11 /usr/bin/python \
+    && ln -sf /usr/bin/python3.11 /usr/bin/python3
 
 # ==============================================================================
 # Layer 2: PyTorch 2.9.1 with CUDA 12.8 (stable + Blackwell compatible)
-# Note: PyTorch 2.10 exists but has xformers compatibility issues as of Feb 2026
+# Using Python 3.11 for maximum compatibility with custom nodes
 # ==============================================================================
 RUN pip install --no-cache-dir \
     torch==2.9.1 \
