@@ -59,7 +59,8 @@ RUN pip install -r requirements.txt || true
 
 WORKDIR /app/ComfyUI
 COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+COPY idle-monitor.sh /app/idle-monitor.sh
+RUN chmod +x /app/start.sh /app/idle-monitor.sh
 
 EXPOSE 8188
 CMD ["/app/start.sh"]
