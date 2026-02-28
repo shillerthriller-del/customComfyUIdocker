@@ -12,6 +12,11 @@ COMFYUI_PORT="${COMFYUI_PORT:-8188}"
 JUPYTER_PORT="${JUPYTER_PORT:-8888}"
 ENABLE_JUPYTER="${ENABLE_JUPYTER:-true}"
 
+# Idle monitor configuration (env vars passed through to idle-monitor.sh)
+export IDLE_TIMEOUT_MINUTES="${IDLE_TIMEOUT_MINUTES:-60}"
+export GPU_IDLE_THRESHOLD="${GPU_IDLE_THRESHOLD:-5}"
+ENABLE_IDLE_MONITOR="${ENABLE_IDLE_MONITOR:-true}"
+
 # Directories to symlink from network volume
 SYMLINK_DIRS=("models" "output" "input" "user")
 
@@ -33,6 +38,13 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 # Cleanup function for graceful shutdown
 cleanup() {
     log_info "Shutting down..."
+    
+    # Kill idle monitor if running
+    if [ -n "${MONITOR_PID:-}" ] && kill -0 "$MONITOR_PID" 2>/dev/null; then
+        log_info "Stopping idle monitor (PID: $MONITOR_PID)"
+        kill -TERM "$MONITOR_PID" 2>/dev/null || true
+        wait "$MONITOR_PID" 2>/dev/null || true
+    fi
     
     # Kill JupyterLab if running
     if [ -n "${JUPYTER_PID:-}" ] && kill -0 "$JUPYTER_PID" 2>/dev/null; then
@@ -172,6 +184,25 @@ if [ "$ENABLE_JUPYTER" = "true" ]; then
 fi
 
 # ==============================================================================
+# Start idle GPU monitor (background)
+# ==============================================================================
+if [ "$ENABLE_IDLE_MONITOR" = "true" ]; then
+    log_info "Starting idle GPU monitor (timeout: ${IDLE_TIMEOUT_MINUTES}min, threshold: ${GPU_IDLE_THRESHOLD}%)..."
+    
+    /app/idle-monitor.sh > /tmp/idle-monitor.log 2>&1 &
+    MONITOR_PID=$!
+    
+    sleep 1
+    if kill -0 "$MONITOR_PID" 2>/dev/null; then
+        log_success "Idle monitor started (PID: $MONITOR_PID)"
+    else
+        log_warning "Idle monitor exited early — check /tmp/idle-monitor.log (may be normal if not on RunPod)"
+    fi
+else
+    log_info "Idle GPU monitor disabled (ENABLE_IDLE_MONITOR=false)"
+fi
+
+# ==============================================================================
 # Connection information
 # ==============================================================================
 echo ""
@@ -185,6 +216,11 @@ echo ""
 echo "  For Krita AI Diffusion, use:"
 echo "    URL: http://<your-pod-ip>:$COMFYUI_PORT"
 echo "    Or:  https://<pod-id>-$COMFYUI_PORT.proxy.runpod.net"
+echo ""
+if [ "$ENABLE_IDLE_MONITOR" = "true" ]; then
+echo "  Idle auto-stop: ${IDLE_TIMEOUT_MINUTES}min @ <${GPU_IDLE_THRESHOLD}% GPU"
+echo "  Monitor log:    /tmp/idle-monitor.log"
+fi
 echo ""
 echo "=========================================="
 echo ""
